@@ -1,23 +1,6 @@
 
 # Case Live Class Data Orchestrations - Week 1
 
-## Directory Structure
-```bash
-.
-├── dags/
-│   ├── create_and_copy_files/
-│   │   ├── run.py
-│   │   └── __init__.py
-│   └── date_generators/
-│       ├── run.py
-│       └── __init__.py
-├── docker-compose.yml
-├── Dockerfile
-├── requirements.txt
-├── start.sh
-├── .gitignore
-└── .env
-```
 ## DAGs Overview
 
 ### 1. Create and Copy Files
