@@ -8,9 +8,9 @@
 │   ├── create_and_copy_files/
 │   │   ├── run.py
 │   │   └── __init__.py
-│   ├── date_generators/
-│   │   ├── run.py
-│   │   └── __init__.py
+│   └── date_generators/
+│       ├── run.py
+│       └── __init__.py
 ├── docker-compose.yml
 ├── Dockerfile
 ├── requirements.txt
