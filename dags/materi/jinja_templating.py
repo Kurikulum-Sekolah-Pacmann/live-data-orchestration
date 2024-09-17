@@ -16,15 +16,15 @@ def jinja_templating():
         bash_command='echo dates : {{ ds }}'
     )
 
-    date_interval_start = BashOperator(
+    data_interval_start = BashOperator(
         task_id='date_interval_start',
-        bash_command='echo data_interval_start : {{ date_interval_start }}'
+        bash_command='echo data_interval_start : {{ data_interval_start }}'
     )
 
     @task
     def print_var_1(value):
         print(value)
 
-    dates >> date_interval_start >> print_var_1(value = var_1)
+    dates >> data_interval_start >> print_var_1(value = var_1)
 
 jinja_templating()
