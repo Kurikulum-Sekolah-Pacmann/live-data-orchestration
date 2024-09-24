@@ -16,12 +16,11 @@ def etl_init():
     @task
     def create_bucket():
         minio_client = MinioClient._get()
-        bucket_name = ['extracted-data', 'transformed-data', 'valid-data', 'invalid-data']
+        bucket_name = 'extracted-data'
         
-        for bucket in bucket_name:
-            if not minio_client.bucket_exists(bucket):
-                minio_client.make_bucket(bucket)
-                
+        if not minio_client.bucket_exists(bucket_name):
+            minio_client.make_bucket(bucket_name)
+
     stg_generate_schema = SQLExecuteQueryOperator(
         task_id='stg_generate_schema',
         conn_id="staging_db",

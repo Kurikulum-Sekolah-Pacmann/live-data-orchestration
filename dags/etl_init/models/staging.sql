@@ -1,55 +1,55 @@
--- DROP SCHEMA staging;
+-- DROP SCHEMA IF EXISTS staging;
 
-CREATE SCHEMA staging AUTHORIZATION postgres;
+CREATE SCHEMA IF NOT EXISTS staging AUTHORIZATION postgres;
 
--- DROP SEQUENCE staging.categories_category_seq;
+-- DROP SEQUENCE IF EXISTS staging.categories_category_seq;
 
-CREATE SEQUENCE staging.categories_category_seq
+CREATE SEQUENCE IF NOT EXISTS staging.categories_category_seq
 	INCREMENT BY 1
 	MINVALUE 1
 	MAXVALUE 2147483647
 	START 1
 	CACHE 1
 	NO CYCLE;
--- DROP SEQUENCE staging.customer_orders_history_order_id_seq;
+-- DROP SEQUENCE IF EXISTS staging.customer_orders_history_order_id_seq;
 
-CREATE SEQUENCE staging.customer_orders_history_order_id_seq
+CREATE SEQUENCE IF NOT EXISTS staging.customer_orders_history_order_id_seq
 	INCREMENT BY 1
 	MINVALUE 1
 	MAXVALUE 2147483647
 	START 1
 	CACHE 1
 	NO CYCLE;
--- DROP SEQUENCE staging.customer_orders_history_orderline_id_seq;
+-- DROP SEQUENCE IF EXISTS staging.customer_orders_history_orderline_id_seq;
 
-CREATE SEQUENCE staging.customer_orders_history_orderline_id_seq
+CREATE SEQUENCE IF NOT EXISTS staging.customer_orders_history_orderline_id_seq
 	INCREMENT BY 1
 	MINVALUE 1
 	MAXVALUE 2147483647
 	START 1
 	CACHE 1
 	NO CYCLE;
--- DROP SEQUENCE staging.customers_customerid_seq;
+-- DROP SEQUENCE IF EXISTS staging.customers_customerid_seq;
 
-CREATE SEQUENCE staging.customers_customerid_seq
+CREATE SEQUENCE IF NOT EXISTS staging.customers_customerid_seq
 	INCREMENT BY 1
 	MINVALUE 1
 	MAXVALUE 2147483647
 	START 1
 	CACHE 1
 	NO CYCLE;
--- DROP SEQUENCE staging.orders_orderid_seq;
+-- DROP SEQUENCE IF EXISTS staging.orders_orderid_seq;
 
-CREATE SEQUENCE staging.orders_orderid_seq
+CREATE SEQUENCE IF NOT EXISTS staging.orders_orderid_seq
 	INCREMENT BY 1
 	MINVALUE 1
 	MAXVALUE 2147483647
 	START 1
 	CACHE 1
 	NO CYCLE;
--- DROP SEQUENCE staging.products_prod_id_seq;
+-- DROP SEQUENCE IF EXISTS staging.products_prod_id_seq;
 
-CREATE SEQUENCE staging.products_prod_id_seq
+CREATE SEQUENCE IF NOT EXISTS staging.products_prod_id_seq
 	INCREMENT BY 1
 	MINVALUE 1
 	MAXVALUE 2147483647
@@ -59,9 +59,9 @@ CREATE SEQUENCE staging.products_prod_id_seq
 
 -- Drop table
 
--- DROP TABLE staging.categories;
+-- DROP TABLE IF EXISTS staging.categories;
 
-CREATE TABLE staging.categories (
+CREATE TABLE IF NOT EXISTS staging.categories (
 	category serial4 NOT NULL,
 	categoryname varchar(50) NOT NULL,
 	created_at timestamp NULL DEFAULT CURRENT_TIMESTAMP,
@@ -73,9 +73,9 @@ CREATE TABLE staging.categories (
 
 -- Drop table
 
--- DROP TABLE staging.customer_orders_history;
+-- DROP TABLE IF EXISTS staging.customer_orders_history;
 
-CREATE TABLE staging.customer_orders_history (
+CREATE TABLE IF NOT EXISTS staging.customer_orders_history (
 	customer_id int4 NULL,
 	customer_address1 varchar(255) NULL,
 	customer_address2 varchar(255) NULL,
@@ -122,9 +122,9 @@ CREATE TABLE staging.customer_orders_history (
 
 -- Drop table
 
--- DROP TABLE staging.customers;
+-- DROP TABLE IF EXISTS staging.customers;
 
-CREATE TABLE staging.customers (
+CREATE TABLE IF NOT EXISTS staging.customers (
 	customerid serial4 NOT NULL,
 	firstname varchar NOT NULL,
 	lastname varchar NOT NULL,
@@ -148,16 +148,16 @@ CREATE TABLE staging.customers (
 	created_at timestamp NULL DEFAULT CURRENT_TIMESTAMP,
 	CONSTRAINT customers_pkey PRIMARY KEY (customerid)
 );
-CREATE UNIQUE INDEX ix_cust_username ON staging.customers USING btree (username);
+CREATE UNIQUE INDEX IF NOT EXISTS ix_cust_username ON staging.customers USING btree (username);
 
 
 -- staging.inventory definition
 
 -- Drop table
 
--- DROP TABLE staging.inventory;
+-- DROP TABLE IF EXISTS staging.inventory;
 
-CREATE TABLE staging.inventory (
+CREATE TABLE IF NOT EXISTS staging.inventory (
 	prod_id int4 NOT NULL,
 	quan_in_stock int4 NOT NULL,
 	sales int4 NOT NULL,
@@ -170,9 +170,9 @@ CREATE TABLE staging.inventory (
 
 -- Drop table
 
--- DROP TABLE staging.order_status_analytic;
+-- DROP TABLE IF EXISTS staging.order_status_analytic;
 
-CREATE TABLE staging.order_status_analytic (
+CREATE TABLE IF NOT EXISTS staging.order_status_analytic (
 	orderid int4 NOT NULL,
 	sum_stock numeric(12, 2) NOT NULL,
 	status varchar(50) NOT NULL,
@@ -184,9 +184,9 @@ CREATE TABLE staging.order_status_analytic (
 
 -- Drop table
 
--- DROP TABLE staging.cust_hist;
+-- DROP TABLE IF EXISTS staging.cust_hist;
 
-CREATE TABLE staging.cust_hist (
+CREATE TABLE IF NOT EXISTS staging.cust_hist (
 	customerid int4 NOT NULL,
 	orderid int4 NOT NULL,
 	prod_id int4 NOT NULL,
@@ -194,16 +194,16 @@ CREATE TABLE staging.cust_hist (
 	CONSTRAINT unique_id UNIQUE (customerid, orderid, prod_id),
 	CONSTRAINT fk_cust_hist_customerid FOREIGN KEY (customerid) REFERENCES staging.customers(customerid) ON DELETE CASCADE
 );
-CREATE INDEX ix_cust_hist_customerid ON staging.cust_hist USING btree (customerid);
+CREATE INDEX IF NOT EXISTS ix_cust_hist_customerid ON staging.cust_hist USING btree (customerid);
 
 
 -- staging.orders definition
 
 -- Drop table
 
--- DROP TABLE staging.orders;
+-- DROP TABLE IF EXISTS staging.orders;
 
-CREATE TABLE staging.orders (
+CREATE TABLE IF NOT EXISTS staging.orders (
 	orderid serial4 NOT NULL,
 	orderdate date NOT NULL,
 	customerid int4 NULL,
@@ -214,16 +214,16 @@ CREATE TABLE staging.orders (
 	CONSTRAINT orders_pkey PRIMARY KEY (orderid),
 	CONSTRAINT fk_customerid FOREIGN KEY (customerid) REFERENCES staging.customers(customerid) ON DELETE SET NULL
 );
-CREATE INDEX ix_order_custid ON staging.orders USING btree (customerid);
+CREATE INDEX IF NOT EXISTS ix_order_custid ON staging.orders USING btree (customerid);
 
 
 -- staging.products definition
 
 -- Drop table
 
--- DROP TABLE staging.products;
+-- DROP TABLE IF EXISTS staging.products;
 
-CREATE TABLE staging.products (
+CREATE TABLE IF NOT EXISTS staging.products (
 	prod_id serial4 NOT NULL,
 	category int4 NOT NULL,
 	title varchar(50) NOT NULL,
@@ -236,17 +236,17 @@ CREATE TABLE staging.products (
 	CONSTRAINT fk_prod_category FOREIGN KEY (category) REFERENCES staging.categories(category) ON DELETE CASCADE,
 	CONSTRAINT fk_products_category FOREIGN KEY (category) REFERENCES staging.categories(category) ON DELETE CASCADE
 );
-CREATE INDEX ix_prod_category ON staging.products USING btree (category);
-CREATE INDEX ix_prod_special ON staging.products USING btree (special);
+CREATE INDEX IF NOT EXISTS ix_prod_category ON staging.products USING btree (category);
+CREATE INDEX IF NOT EXISTS ix_prod_special ON staging.products USING btree (special);
 
 
 -- staging.orderlines definition
 
 -- Drop table
 
--- DROP TABLE staging.orderlines;
+-- DROP TABLE IF EXISTS staging.orderlines;
 
-CREATE TABLE staging.orderlines (
+CREATE TABLE IF NOT EXISTS staging.orderlines (
 	orderlineid int4 NOT NULL,
 	orderid int4 NOT NULL,
 	prod_id int4 NOT NULL,
@@ -256,4 +256,4 @@ CREATE TABLE staging.orderlines (
 	CONSTRAINT fk_orderid FOREIGN KEY (orderid) REFERENCES staging.orders(orderid) ON DELETE CASCADE,
 	CONSTRAINT fk_orderlines_prod_id FOREIGN KEY (prod_id) REFERENCES staging.products(prod_id) ON DELETE CASCADE
 );
-CREATE UNIQUE INDEX ix_orderlines_orderid ON staging.orderlines USING btree (orderid, orderlineid);
+CREATE UNIQUE INDEX IF NOT EXISTS ix_orderlines_orderid ON staging.orderlines USING btree (orderid, orderlineid);
