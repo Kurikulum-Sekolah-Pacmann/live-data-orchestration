@@ -17,7 +17,7 @@ def dellstore_db(incremental):
                 python_callable = Extract._dellstore_db,
                 op_kwargs = {
                     'table_name': f'{table_name}',
-                    'incremental': True
+                    'incremental': incremental
                 }
             )
 
@@ -37,7 +37,7 @@ def dellstore_db(incremental):
                 op_kwargs = {
                     'table_name': table_name,
                     'table_pkey': table_pkey,
-                    'incremental': True
+                    'incremental': incremental
                 },
             )
 

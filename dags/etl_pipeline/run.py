@@ -16,7 +16,7 @@ from etl_pipeline.tasks.staging.dellstore_spreadsheet import dellstore_spreadshe
 def etl_pipeline():
     @task_group
     def staging():  
-        dellstore_db(incremental = True) >> dellstore_api() >> dellstore_spreadsheet() 
+        dellstore_db(incremental = False) >> dellstore_api() >> dellstore_spreadsheet() 
 
     staging()
 

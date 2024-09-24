@@ -1,12 +1,10 @@
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.exceptions import AirflowSkipException
 from airflow.providers.google.common.hooks.base_google import GoogleBaseHook
-from helper.minio import MinioClient
-from io import BytesIO
+from helper.minio import CustomMinio
 from datetime import timedelta
 
 import pandas as pd
-import json
 import requests
 import gspread
 
@@ -43,23 +41,14 @@ class Extract:
         if df.empty:
             raise AirflowSkipException(f"{table_name} doesn't have new data. Skipped...")
         else:
-            csv_bytes = df.to_csv(index=False).encode('utf-8')
-            csv_buffer = BytesIO(csv_bytes)
-
             bucket_name = 'extracted-data'
-            minio_client = MinioClient._get()
             object_name = (
                 f'/temp/{table_name}-{(pd.to_datetime(date) - timedelta(days=1)).strftime("%Y-%m-%d")}.csv'
                 if incremental
                 else f'/temp/{table_name}.csv'
             )
-            minio_client.put_object(
-                bucket_name=bucket_name,
-                object_name=object_name,
-                data=csv_buffer,
-                length=len(csv_bytes),
-                content_type='application/csv'
-            )
+
+            CustomMinio._put_csv(df, bucket_name, object_name)
 
         cursor.close()
         connection.commit()
@@ -85,19 +74,11 @@ class Extract:
             json_data = response.json()
 
             if json_data:
-                json_string = json.dumps(json_data)
-
                 bucket_name = 'extracted-data'
-                minio_client = MinioClient._get()
                 object_name = f'/temp/dellstore_api_{(pd.to_datetime(ds) - timedelta(days=1)).strftime("%Y-%m-%d")}.json'
-                json_bytes = json_string.encode('utf-8')
-                minio_client.put_object(
-                    bucket_name=bucket_name,
-                    object_name=object_name,
-                    data=BytesIO(json_bytes),
-                    length=len(json_bytes),
-                    content_type='application/json'
-                )
+                
+                CustomMinio._put_json(json_data, bucket_name, object_name)
+
             else:
                 raise AirflowSkipException("No new data in Dellstore API. Skipped...")
 
@@ -120,15 +101,4 @@ class Extract:
         if df.empty:
             raise AirflowSkipException("No data in Dellstore Analytics Spreadsheets. Skipped...")
         else:
-            minio_client = MinioClient._get()
-            bucket_name = 'extracted-data'
-            csv_bytes = df.to_csv(index=False).encode('utf-8')
-            csv_buffer = BytesIO(csv_bytes)
-
-            minio_client.put_object(
-                bucket_name=bucket_name,
-                object_name=f'/temp/dellstore_analytics.csv',
-                data=csv_buffer,
-                length=len(csv_bytes),
-                content_type='application/csv'
-            )
+            CustomMinio._put_csv(df, 'extracted-data', f'/temp/dellstore_analytics.csv')

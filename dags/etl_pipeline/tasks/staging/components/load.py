@@ -2,7 +2,7 @@ from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.exceptions import AirflowSkipException
 
 import pandas as pd
-from helper.minio import MinioClient
+from helper.minio import MinioClient, CustomMinio
 from sqlalchemy import create_engine
 from pangres import upsert
 from datetime import timedelta
@@ -27,15 +27,9 @@ class Load:
             else:
                 object_name = f'/temp/{table_name}.csv'
 
-            minio_client = MinioClient._get()
             bucket_name = 'extracted-data'
 
-            data = minio_client.get_object(
-                bucket_name = bucket_name,
-                object_name = object_name
-            )
-
-            df = pd.read_csv(data)
+            df = CustomMinio._get_dataframe(bucket_name, object_name)
             df = df.set_index(table_pkey[table_name])
 
             engine = create_engine(PostgresHook(postgres_conn_id = 'staging_db').get_uri())
@@ -94,16 +88,10 @@ class Load:
         """
         Load data from Dellstore spreadsheet into staging area.
         """
-        minio_client = MinioClient._get()
         bucket_name = 'extracted-data'
         object_name = f'/temp/dellstore_analytics.csv'
 
-        data = minio_client.get_object(
-            bucket_name = bucket_name,
-            object_name = object_name
-        )
-
-        df = pd.read_csv(data)
+        df = CustomMinio._get_dataframe(bucket_name, object_name)
         df = df.set_index('orderid')
 
         engine = create_engine(PostgresHook(postgres_conn_id='staging_db').get_uri())
