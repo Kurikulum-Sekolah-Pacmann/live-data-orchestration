@@ -3,6 +3,7 @@ from airflow.exceptions import AirflowSkipException
 from airflow.providers.google.common.hooks.base_google import GoogleBaseHook
 from helper.minio import CustomMinio
 from datetime import timedelta
+from airflow.models import Variable
 
 import pandas as pd
 import requests
@@ -66,8 +67,8 @@ class Extract:
             AirflowSkipException: If no new data is found.
         """
         response = requests.get(
-            url="https://api-history-order.vercel.app/api/dummydata",
-            params={"start_date": ds, "end_date": ds},
+            url = Variable.get('dellstore_api_url'),
+            params = {"start_date": ds, "end_date": ds},
         )
 
         if response.status_code == 200:

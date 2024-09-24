@@ -21,8 +21,8 @@ def etl_init():
         if not minio_client.bucket_exists(bucket_name):
             minio_client.make_bucket(bucket_name)
 
-    stg_generate_schema = SQLExecuteQueryOperator(
-        task_id='stg_generate_schema',
+    init_stg_schema = SQLExecuteQueryOperator(
+        task_id='init_stg_schema',
         conn_id="staging_db",
         sql="models/staging.sql"
     )
@@ -31,6 +31,6 @@ def etl_init():
     def init_load_stg():
         dellstore_db(incremental = False)
 
-    create_bucket() >> stg_generate_schema >> init_load_stg()
+    create_bucket() >> init_stg_schema >> init_load_stg()
 
 etl_init()
