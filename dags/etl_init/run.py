@@ -1,9 +1,7 @@
-from airflow.decorators import dag, task, task_group
+from airflow.decorators import dag, task
 from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
-
 from pendulum import datetime
 from helper.minio import MinioClient
-from etl_pipeline.tasks.staging.dellstore_db import dellstore_db
 
 @dag(
     dag_id = 'etl_init',
@@ -22,15 +20,11 @@ def etl_init():
             minio_client.make_bucket(bucket_name)
 
     init_stg_schema = SQLExecuteQueryOperator(
-        task_id='init_stg_schema',
-        conn_id="staging_db",
-        sql="models/staging.sql"
+        task_id = 'init_stg_schema',
+        conn_id = 'staging_db',
+        sql = 'models/staging.sql'
     )
 
-    @task_group
-    def init_load_stg():
-        dellstore_db(incremental = False)
-
-    create_bucket() >> init_stg_schema >> init_load_stg()
+    create_bucket() >> init_stg_schema
 
 etl_init()
