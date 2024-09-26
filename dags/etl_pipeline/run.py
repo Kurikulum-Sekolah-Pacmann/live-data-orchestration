@@ -1,9 +1,7 @@
-from airflow.decorators import dag, task_group
+from airflow.decorators import dag
+from airflow.models.variable import Variable
 from pendulum import datetime
-
-from etl_pipeline.tasks.staging.dellstore_db import dellstore_db
-from etl_pipeline.tasks.staging.dellstore_api import dellstore_api
-from etl_pipeline.tasks.staging.dellstore_spreadsheet import dellstore_spreadsheet
+from etl_pipeline.tasks.staging.main import staging
 
 @dag(
     dag_id = 'etl_pipeline',
@@ -14,10 +12,8 @@ from etl_pipeline.tasks.staging.dellstore_spreadsheet import dellstore_spreadshe
 )
 
 def etl_pipeline():
-    @task_group
-    def staging():  
-        dellstore_db(incremental = False) >> dellstore_api() >> dellstore_spreadsheet() 
-
-    staging()
+    incremental_mode = eval(Variable.get('etl_pipeline_incremental_mode'))
+    
+    staging(incremental = incremental_mode)
 
 etl_pipeline()
