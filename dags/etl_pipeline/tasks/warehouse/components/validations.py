@@ -33,11 +33,9 @@ class ValidationType:
         return status in ['partial', 'fulfilled', 'backordered']
     
 class Validation:
-    def _validation_data(need_validation, data, valid_bucket, dest_object, invalid_bucket = None, validation_functions = None ):
+    def _data_validations(need_validation, data, valid_bucket, dest_object, invalid_bucket = None, validation_functions = None, **kwargs):
         data = CustomMinio._get_dataframe('transformed-data', data)
 
-        print(data)
-        print(data.info())
         if need_validation:
             # Create a report DataFrame
             report_data = {f'validate_{name}': data[name].apply(func) for name, func in validation_functions.items()}

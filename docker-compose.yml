@@ -48,7 +48,7 @@ services:
     volumes:
       - profile_quality_db:/var/lib/postgresql/data
 
-  dellstore_db:
+  dellstore_db: 
     image: postgres:latest
     container_name: dellstore_db
     environment:
