@@ -394,7 +394,7 @@ class ExtractTransform:
                 data = data.drop_duplicates(subset='product_nk')
 
                 # Extract data from the `categories` table
-                categories = _extract(connection_id = 'warehouse_db', table_name = 'categories', incremental = False)
+                categories = _extract(connection_id = 'warehouse_db', table_name = 'categories', incremental = incremental)
 
                 #Lookup `category_id` from `categories` table based on `category`   
                 data['category_id'] = data['category_nk'].apply(lambda x: categories.loc[categories['category_nk'] == x, 'category_id'].values[0])
@@ -438,7 +438,7 @@ class ExtractTransform:
                 data = data.drop_duplicates(subset='order_nk')
 
                 # Extract data from the `customers` table
-                customer = _extract(connection_id = 'warehouse_db', table_name = 'customers', incremental = False)
+                customer = _extract(connection_id = 'warehouse_db', table_name = 'customers', incremental = incremental)
 
                 #Lookup `customer_id` from `customers` table based on `customer_nk`   
                 data['customer_id'] = data['customer_nk'].apply(lambda x: customer.loc[customer['customer_nk'] == x, 'customer_id'].values[0])
