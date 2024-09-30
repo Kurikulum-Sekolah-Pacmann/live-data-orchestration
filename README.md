@@ -7,7 +7,7 @@ This project aims to streamline the process of extracting, transforming, and loa
 The project is structured into two primary components:
 
 1. **etl_init**: This component is responsible for initializing the staging database by creating the necessary tables and setting up the environment for data extraction and loading. This includes database schema creation, data type definition, and indexing for optimal performance.
-2. **etl_pipeline**: This component is the core of the project, responsible for extracting data from various sources (databases, APIs, and spreadsheets), transforming the data as needed, and loading it into the staging database. This involves data cleansing, data mapping, and data validation to ensure data consistency and integrity.
+2. **etl_pipeline**: This component is the core of the project, responsible for extracting data from various sources (databases, APIs, and spreadsheets) and loading it into the staging database. This involves data cleansing, data mapping, and data validation to ensure data consistency and integrity.
 
 ## Technologies Used
 
