@@ -33,7 +33,7 @@ class Extract:
             connection = pg_hook.get_conn()
             cursor = connection.cursor()
 
-            query = f"SELECT * FROM {table_name}"
+            query = f"SELECT * FROMs {table_name}"
             if incremental:
                 date = kwargs['ds']
                 query += f" WHERE created_at::DATE = '{date}'::DATE - INTERVAL '1 DAY';"
