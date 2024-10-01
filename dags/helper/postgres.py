@@ -4,6 +4,7 @@ BASE_PATH = "/opt/airflow/dags"
 
 
 class Execute:
+    @staticmethod
     def _query(connection_id, query_path):
         hook = PostgresHook(postgres_conn_id = connection_id)
         connection = hook.get_conn()
@@ -17,6 +18,7 @@ class Execute:
         connection.commit()
         connection.close()
 
+    @staticmethod
     def _get_dataframe(connection_id, query_path):
         pg_hook = PostgresHook(postgres_conn_id = connection_id)
         connection = pg_hook.get_conn()
@@ -36,7 +38,7 @@ class Execute:
         
         return df
 
-
+    @staticmethod
     def _insert_dataframe(connection_id, query_path, dataframe):
         BASE_PATH = "/opt/airflow/dags"
         

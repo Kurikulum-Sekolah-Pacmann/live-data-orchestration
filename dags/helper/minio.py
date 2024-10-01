@@ -5,6 +5,7 @@ import pandas as pd
 import json
 
 class MinioClient:
+    @staticmethod
     def _get():
         minio = BaseHook.get_connection('minio')
         client = Minio(
@@ -17,6 +18,7 @@ class MinioClient:
         return client
     
 class CustomMinio:
+    @staticmethod
     def _put_csv(dataframe, bucket_name, object_name):
         csv_bytes = dataframe.to_csv(index=False).encode('utf-8')
         csv_buffer = BytesIO(csv_bytes)
@@ -30,6 +32,7 @@ class CustomMinio:
             content_type = 'application/csv'
         )
 
+    @staticmethod
     def _put_json(json_data, bucket_name, object_name):
         json_string = json.dumps(json_data)
         json_bytes = json_string.encode('utf-8')
@@ -44,6 +47,7 @@ class CustomMinio:
             content_type = 'application/json'
         )
 
+    @staticmethod
     def _get_dataframe(bucket_name, object_name):
         minio_client = MinioClient._get()
         data = minio_client.get_object(
