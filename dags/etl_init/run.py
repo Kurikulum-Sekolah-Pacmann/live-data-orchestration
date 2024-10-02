@@ -11,6 +11,15 @@ from helper.minio import MinioClient
 )
 
 def etl_init():
+    @task
+    def create_bucket():
+        minio_client = MinioClient._get()
+        bucket_name = ['extracted-data', 'transformed-data', 'valid-data', 'invalid-data']
+        
+        for bucket in bucket_name:
+            if not minio_client.bucket_exists(bucket):
+                minio_client.make_bucket(bucket)
+                
     @task_group
     def generate_schema():
         staging = SQLExecuteQueryOperator(
@@ -26,15 +35,6 @@ def etl_init():
         )
 
         staging >> warehouse
-    
-    @task
-    def create_bucket():
-        minio_client = MinioClient._get()
-        bucket_name = ['extracted-data', 'transformed-data', 'valid-data', 'invalid-data']
-        
-        for bucket in bucket_name:
-            if not minio_client.bucket_exists(bucket):
-                minio_client.make_bucket(bucket)
 
     create_bucket() >> generate_schema()
 
