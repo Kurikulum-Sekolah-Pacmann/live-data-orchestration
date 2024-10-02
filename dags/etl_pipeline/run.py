@@ -4,7 +4,7 @@ from pendulum import datetime
 from etl_pipeline.tasks.staging.main import staging
 from etl_pipeline.tasks.warehouse.main import warehouse
 from helper.callbacks.slack_notifier import slack_notifier
-
+from airflow.models.variable import Variable
 
 default_args = {
     'on_failure_callback': slack_notifier
@@ -20,6 +20,8 @@ default_args = {
 )
 
 def etl_pipeline():
-    staging(incremental=False) >> warehouse(incremental=False)
+    incremental_mode = eval(Variable.get('etl_pipeline_incremental_mode'))
+
+    staging(incremental=incremental_mode) >> warehouse(incremental=incremental_mode)
 
 etl_pipeline()
