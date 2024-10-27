@@ -3,7 +3,7 @@
 ## Database
 
 ERD:
-![Startup Public Image](https://sekolahdata-assets.s3.ap-southeast-1.amazonaws.com/notebook-images/mde-data-ingestion-spark/startup_-_public.png 'ERD')
+![Startup Public Image](https://github.com/Kurikulum-Sekolah-Pacmann/live-data-orchestration/blob/final-project/img/startup_-_public.png 'ERD')
 
 
 ### Company 
