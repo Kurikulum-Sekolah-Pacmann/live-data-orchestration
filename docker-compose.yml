@@ -11,15 +11,13 @@ x-airflow-common:
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW_DB_URI}
     AIRFLOW__CELERY__RESULT_BACKEND: ${AIRFLOW_CELERY_RESULT_BACKEND}
     AIRFLOW__CELERY__BROKER_URL: ${AIRFLOW_CELERY_BROKER_URL}
-    AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
+    AIRFLOW__CORE__FERNET_KEY: ''
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
-    AIRFLOW__COSMOS__ENRICH_LOGGING: "True"
     AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_WEBSERVER_SECRET_KEY}
-    AIRFLOW__CORE__DAGBAG_IMPORT_TIMEOUT: '600'
-    _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
+
   volumes:
     - ./dags:/opt/airflow/dags
   user: ${AIRFLOW_UID}
@@ -27,12 +25,12 @@ x-airflow-common:
     &airflow-common-depends-on
     redis:
       condition: service_healthy
-    airflow-metadata-6:
+    airflow-metadata-7:
       condition: service_healthy
 
 services:
-  airflow-metadata-6:
-    container_name: airflow-metadata-6
+  airflow-metadata-7:
+    container_name: airflow-metadata-7
     image: postgres:13
     environment:
       POSTGRES_USER: ${AIRFLOW_DB_USER}
@@ -41,13 +39,15 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - airflow-metadata-6:/var/lib/postgresql/data
+      - airflow-metadata-7:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "${AIRFLOW_DB_USER}"]
       interval: 10s
       retries: 5
       start_period: 5s
     restart: always
+    networks:
+      - airflow-networks
 
   redis:
     container_name: redis
@@ -61,6 +61,8 @@ services:
       retries: 50
       start_period: 30s
     restart: always
+    networks:
+      - airflow-networks
 
   airflow-webserver:
     container_name: airflow-webserver
@@ -79,6 +81,8 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    networks:
+      - airflow-networks
 
   airflow-scheduler:
     container_name: airflow-scheduler
@@ -95,6 +99,8 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    networks:
+      - airflow-networks
 
   airflow-worker:
     container_name: airflow-worker
@@ -116,6 +122,8 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    networks:
+      - airflow-networks
 
   airflow-triggerer:
     container_name: airflow-triggerer
@@ -132,6 +140,8 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    networks:
+      - airflow-networks
 
   airflow-init:
     container_name: airflow-init
@@ -189,12 +199,14 @@ services:
       <<: *airflow-common-env
       _AIRFLOW_DB_MIGRATE: 'true'
       _AIRFLOW_WWW_USER_CREATE: 'true'
-      _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
-      _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
+      _AIRFLOW_WWW_USER_USERNAME: ${AIRFLOW_USER}
+      _AIRFLOW_WWW_USER_PASSWORD: ${AIRFLOW_PASSWORD}
       _PIP_ADDITIONAL_REQUIREMENTS: ''
     user: "0:0"
     volumes:
       - ./:/sources
+    networks:
+      - airflow-networks
 
   airflow-cli:
     container_name: airflow-cli
@@ -208,6 +220,8 @@ services:
       - bash
       - -c
       - airflow
+    networks:
+      - airflow-networks
 
   flower:
     container_name: flower
@@ -228,6 +242,27 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    networks:
+      - airflow-networks
+
+  credit_score_db:
+    image: postgres:latest
+    container_name: credit_score_db
+    environment:
+      POSTGRES_USER: ${CREDIT_SCORE_DB_USER}
+      POSTGRES_PASSWORD: ${CREDIT_SCORE_DB_PASSWORD}
+      POSTGRES_DB: ${CREDIT_SCORE_DB_NAME}
+    ports:
+      - 5434:5432
+    volumes:
+      - ./credit_data:/docker-entrypoint-initdb.d
+      - credit_score_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${CREDIT_SCORE_DB_USER}"]
+      interval: 5s
+    restart: always
+    networks:
+      - airflow-networks
 
   minio:
     image: minio/minio:RELEASE.2024-06-13T22-53-53Z
@@ -248,6 +283,8 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
+    networks:
+      - airflow-networks
 
   createbuckets:
     image: minio/mc
@@ -256,59 +293,28 @@ services:
     entrypoint: >
       /bin/sh -c "
       /usr/bin/mc config host add myminio http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD};
-      /usr/bin/mc rm -r --force myminio/extracted-data;
-      /usr/bin/mc mb myminio/extracted-data;
-      /usr/bin/mc policy download myminio/extracted-data;
+      /usr/bin/mc rm -r --force myminio/credit-scoring-service;
+      /usr/bin/mc mb myminio/credit-scoring-service;
+      /usr/bin/mc policy download myminio/credit-scoring-service;
       exit 0;
       "
+    networks:
+      - airflow-networks
 
-  dvd-rental-db:
-    image: postgres:latest
-    container_name: dvd-rental-db
-    environment:
-      POSTGRES_USER: ${DVDRENTAL_DB_USER}
-      POSTGRES_PASSWORD: ${DVDRENTAL_DB_PASSWORD}
-      POSTGRES_DB: ${DVDRENTAL_DB_NAME}
-    ports:
-      - 5434:5432
-    volumes:
-      - ./dvdrental:/docker-entrypoint-initdb.d
-      - dvd-rental-db:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD", "pg_isready", "-U", "${DVDRENTAL_DB_USER}"]
-      interval: 5s
-    restart: always
+networks:
+  airflow-networks:
+    driver: bridge
+    name: airflow-networks
 
-  warehouse-db:
-    image: postgres:latest
-    container_name: warehouse-db
-    environment:
-      POSTGRES_USER: ${WAREHOUSE_DB_USER}
-      POSTGRES_PASSWORD: ${WAREHOUSE_DB_PASSWORD}
-      POSTGRES_DB: ${WAREHOUSE_DB_NAME}
-    ports:
-      - 5435:5432
-    volumes:
-      - ./warehouse:/docker-entrypoint-initdb.d
-      - warehouse-db:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD", "pg_isready", "-U", "${WAREHOUSE_DB_USER}"]
-      interval: 5s
-    restart: always
-    
 volumes:
-  airflow-metadata-6:
+  airflow-metadata-7:
     driver: local
-    name: airflow-metadata-6
+    name: airflow-metadata-7
+
+  credit_score_db:
+    driver: local
+    name: credit_score_db
 
   minio-data:
     driver: local
     name: minio-data
-
-  dvd-rental-db:
-    driver: local
-    name: dvd-rental-db
-
-  warehouse-db:
-    driver: local
-    name: warehouse-db
