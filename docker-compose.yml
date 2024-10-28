@@ -301,6 +301,18 @@ services:
     networks:
       - airflow-networks
 
+  ml_api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: ml_api
+    ports:
+      - 8000:8000
+    volumes:
+      - ./api/models/:/api_dir/models
+    networks:
+      - airflow-networks
+
 networks:
   airflow-networks:
     driver: bridge
