@@ -17,6 +17,10 @@ x-airflow-common:
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
     AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_WEBSERVER_SECRET_KEY}
+    # Logging to S3 config
+    AIRFLOW__LOGGING__REMOTE_LOGGING: True
+    AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: ${AIRFLOW_LOGGING_REMOTE_BASE_LOG_FOLDER}
+    AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: ${AIRFLOW_LOGGING_REMOTE_LOG_CONN_ID}
 
   volumes:
     - ./dags:/opt/airflow/dags
@@ -294,8 +298,11 @@ services:
       /bin/sh -c "
       /usr/bin/mc config host add myminio http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD};
       /usr/bin/mc rm -r --force myminio/credit-scoring-service;
+      /usr/bin/mc rm -r --force myminio/airflow-logs;
       /usr/bin/mc mb myminio/credit-scoring-service;
+      /usr/bin/mc mb myminio/airflow-logs;
       /usr/bin/mc policy download myminio/credit-scoring-service;
+      /usr/bin/mc policy download myminio/airflow-logs;
       exit 0;
       "
     networks:
