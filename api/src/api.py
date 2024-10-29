@@ -19,10 +19,10 @@ class Prediction_Data(BaseModel):
     cb_person_default_on_file: str = "Y"
     cb_person_cred_hist_length: int = 3
 
-num_imputer = joblib.load("../models/preprocess_num_imputer_20221231.pkl")
-cat_imputer = joblib.load("../models/preprocess_cat_imputer_20221231.pkl")
-ohe_encoder = joblib.load("../models/preprocess_ohe_20221231.pkl")
-scaler = joblib.load("../models/preprocess_scaler_20221231.pkl")
+num_imputer = joblib.load("../models/preprocess_num_imputer_20231231.pkl")
+cat_imputer = joblib.load("../models/preprocess_cat_imputer_20231231.pkl")
+ohe_encoder = joblib.load("../models/preprocess_ohe_20231231.pkl")
+scaler = joblib.load("../models/preprocess_scaler_20231231.pkl")
 model = joblib.load("../models/best_model.pkl")
 
 @app.post("/predict/")
