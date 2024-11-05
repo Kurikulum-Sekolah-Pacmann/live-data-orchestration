@@ -16,17 +16,12 @@ x-airflow-common:
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
     AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_WEBSERVER_SECRET_KEY}
-    # Logging to S3 config
-    AIRFLOW__LOGGING__REMOTE_LOGGING: True
-    AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: ${AIRFLOW_LOGGING_REMOTE_BASE_LOG_FOLDER}
-    AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: ${AIRFLOW_LOGGING_REMOTE_LOG_CONN_ID}
-    # Monitoring config
-    AIRFLOW__METRICS__STATSD_ON: True
-    AIRFLOW__METRICS__STATSD_HOST: ${AIRFLOW_METRICS_STATSD_HOST}
-    AIRFLOW__METRICS__STATSD_PORT: ${AIRFLOW_METRICS_STATSD_PORT}
-    AIRFLOW__METRICS__STATSD_PREFIX: airflow
-    # FERNET KEY (To encrypt sensitive data in metadata database)
-    AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
+    # STEP 1 : Configure Remote Logging in Airflow
+    # ...
+
+    # STEP 2 : Configure Monitoring in Airflow 
+    # ...
+
     
   volumes:
     - ./dags:/opt/airflow/dags
